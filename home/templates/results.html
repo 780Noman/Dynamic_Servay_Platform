@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Results for {{ feedback.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="header center teal-text text-darken-2">Results for "{{ feedback.title }}"</h2>
+
+    <div class="row">
+        {% for item in data %}
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">{{ item.question }}</span>
+                    <canvas id="chart_{{ forloop.counter }}"></canvas>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col s12">
+            <div class="card-panel teal lighten-5">
+                <span class="teal-text text-darken-4">No results to display for this survey yet.</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="center-align" style="margin-top: 30px;">
+        <a href="{% url 'all_results' %}" class="btn-large waves-effect waves-light teal"><i class="material-icons left">arrow_back</i> Back to All Results</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for item in data %}
+        const ctx_{{ forloop.counter }} = document.getElementById('chart_{{ forloop.counter }}').getContext('2d');
+        const chart_{{ forloop.counter }} = new Chart(ctx_{{ forloop.counter }}, {
+            type: '{{ item.question_type|lower }}' === 'radio' ? 'pie' : 'bar',
+            data: {
+                labels: {{ item.labels|safe }},
+                datasets: [{
+                    label: 'Responses',
+                    data: {{ item.values|safe }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {% endfor %}
+    });
+</script>
+{% endblock %}

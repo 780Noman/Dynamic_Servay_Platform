@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ feedback.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="progress">
+        <div class="determinate" style="width: 0%"></div>
+    </div>
+    <h2 class="header center teal-text text-darken-2">{{ feedback.title }}</h2>
+    <p class="center-align">{{ feedback.description }}</p>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {% for question in questions %}
+        <div class="card">
+            <div class="card-content">
+                <span class="card-title">{{ forloop.counter }}. {{ question.question }}</span>
+                <div class="input-field">
+                    {% if question.question_type == "Text" %}
+                    <input required type="text" name="response_{{ question.id }}" class="validate">
+                    <label for="response_{{ question.id }}">Your Answer</label>
+                    {% elif question.question_type == "BigText" %}
+                    <textarea required name="response_{{ question.id }}" class="materialize-textarea"></textarea>
+                    <label for="response_{{ question.id }}">Your Detailed Answer</label>
+                    {% elif question.question_type == "Radio" %}
+                    {% for option in question.option.all %}
+                    <p>
+                        <label>
+                            <input type="radio" name="options_{{ question.id }}" value="{{ option.id }}" required>
+                            <span>{{ option.option_name }}</span>
+                        </label>
+                    </p>
+                    {% endfor %}
+                    {% elif question.question_type == "Checkbox" %}
+                    {% for option in question.option.all %}
+                    <p>
+                        <label>
+                            <input type="checkbox" name="options_{{ question.id }}" value="{{ option.id }}">
+                            <span>{{ option.option_name }}</span>
+                        </label>
+                    </p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="center-align" style="margin-top: 30px;">
+            <button type="submit" class="btn-large waves-effect waves-light teal">Submit Your Feedback <i class="material-icons right">send</i></button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const progressBar = document.querySelector('.determinate');
+        const totalQuestions = {{ questions|length }};
+        let answeredQuestions = 0;
+
+        form.addEventListener('change', function(e) {
+            const answered = new Set();
+            form.querySelectorAll('input[type=text], textarea, input[type=radio]:checked, input[type=checkbox]:checked').forEach(function(el) {
+                if (el.value) {
+                    answered.add(el.name);
+                }
+            });
+            answeredQuestions = answered.size;
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            progressBar.style.width = progress + '%';
+        });
+    });
+</script>
+{% endblock %}
