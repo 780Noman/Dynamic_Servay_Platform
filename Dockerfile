@@ -27,4 +27,4 @@ RUN python manage.py collectstatic --no-input
 EXPOSE 7860
 
 # Start the Gunicorn server
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "feedback.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:7860 feedback.wsgi:application"]
