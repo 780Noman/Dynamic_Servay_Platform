@@ -20,11 +20,15 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 # Copy the application code
 COPY --chown=user . .
 
+# Copy and set permissions for entrypoint script
+COPY --chown=user entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
 # Run collectstatic to gather all static files
 RUN python manage.py collectstatic --no-input
 
 # Expose the port the app runs on
 EXPOSE 7860
 
-# Start the Gunicorn server
-CMD ["sh", "-c", "python manage.py migrate && gunicorn --bind 0.0.0.0:7860 feedback.wsgi:application"]
+# Run the entrypoint script
+CMD ["/home/user/app/entrypoint.sh"]
